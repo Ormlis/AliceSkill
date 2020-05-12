@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask, request
 import logging
 
@@ -33,7 +35,6 @@ def handle_dialog(req, res):
     user_id = req['session']['user_id']
 
     if req['session']['new']:
-
         sessionStorage[user_id] = {
             'suggests': [
                 "Не хочу.",
@@ -83,4 +84,4 @@ def get_suggests(user_id):
 
 
 if __name__ == '__main__':
-    app.run()
+    app.run(port=os.environ.get("PORT", 5000), host='0.0.0.0')
