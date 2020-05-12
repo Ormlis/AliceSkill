@@ -11,6 +11,11 @@ logging.basicConfig(level=logging.INFO)
 
 sessionStorage = {}
 
+chooses = [
+    'слон',
+    'кролик'
+]
+
 
 @app.route('/post', methods=['POST'])
 def main():
@@ -40,9 +45,10 @@ def handle_dialog(req, res):
                 "Не хочу.",
                 "Не буду.",
                 "Отстань!",
-            ]
+            ],
+            'choose': 0
         }
-        res['response']['text'] = 'Привет! Купи слона!'
+        res['response']['text'] = f'Привет! Купи {chooses[sessionStorage[user_id]["choose"]]}а!'
         res['response']['buttons'] = get_suggests(user_id)
         return
 
@@ -54,13 +60,24 @@ def handle_dialog(req, res):
         'я покупаю',
         'я куплю'
     ]:
-        # Пользователь согласился, прощаемся.
-        res['response']['text'] = 'Слона можно найти на Яндекс.Маркете!'
-        res['response']['end_session'] = True
-        return
+        sessionStorage[user_id]['choose'] += 1
+        res['response']['text'] = f'{chooses[sessionStorage[user_id]["choose"]].capitalize()}а ' \
+                                  f'можно найти на Яндекс.Маркете!'
 
+        if sessionStorage[user_id]['choose'] == len(chooses):
+            # Пользователь согласился, прощаемся.
+            res['response']['end_session'] = True
+            sessionStorage[user_id]['choose'] = 0
+            return
+        res['response']['text'] = f'Ну тогда купи и {chooses[sessionStorage[user_id]["choose"]]}а!'
+        sessionStorage[user_id]['suggests'] = ["Не хочу.",
+                                               "Не буду.",
+                                               "Отстань!"]
+        res['response']['buttons'] = get_suggests(user_id)
+        return
     res['response']['text'] = \
-        f"Все говорят '{req['request']['original_utterance']}', а ты купи слона!"
+        f"Все говорят '{req['request']['original_utterance']}', а " \
+        f"ты купи {chooses[sessionStorage[user_id]['choose']]}а!"
     res['response']['buttons'] = get_suggests(user_id)
 
 
@@ -78,7 +95,8 @@ def get_suggests(user_id):
     if len(suggests) < 2:
         suggests.append({
             "title": "Ладно",
-            "url": "https://market.yandex.ru/search?text=слон",
+            "url": f"https://market.yandex.ru/search?"
+                   f"text={chooses[sessionStorage[user_id]['choose']]}",
             "hide": True
         })
 
