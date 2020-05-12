@@ -60,10 +60,9 @@ def handle_dialog(req, res):
         'я покупаю',
         'я куплю'
     ]:
-        sessionStorage[user_id]['choose'] += 1
         res['response']['text'] = f'{chooses[sessionStorage[user_id]["choose"]].capitalize()}а ' \
                                   f'можно найти на Яндекс.Маркете!'
-
+        sessionStorage[user_id]['choose'] += 1
         if sessionStorage[user_id]['choose'] == len(chooses):
             # Пользователь согласился, прощаемся.
             res['response']['end_session'] = True
